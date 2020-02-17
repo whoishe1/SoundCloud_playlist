@@ -10,77 +10,93 @@ import os
 #Desktop Path
 desktop = os.path.join(os.path.join(os.environ["USERPROFILE"]), 'Desktop')
 
+class GetSpotify:
+    def __init__(self,url):
+        self.url = url
 
-#Get PlaylistNames
-def which_playlists(URL):
-    """@param URL: soundcloud playlist url page"""
-    this_url = URL
-    driver = webdriver.Chrome()
-    try:
-        driver.get(this_url)
-        last_height = driver.execute_script("return document.body.scrollHeight")
-        while True:
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(3)
-            new_height = driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
+    def which_playlists(self):
+        """
+        Get playlist url page and load playlists
+        @param URL: soundcloud playlist url page
+        """
+        this_url = self.url
+        user = self.url.split('/')[3]
+        driver = webdriver.Chrome()
+        try:
+            driver.get(this_url)
+            last_height = driver.execute_script("return document.body.scrollHeight")
+            while True:
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(3)
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+                last_height = new_height
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+            soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        playlist_extensions = soup.find_all("a", class_ = {"soundTitle__title sc-link-dark"})
-        playlist_extensions
+            playlist_extensions = soup.find_all("a", class_ = {"soundTitle__title sc-link-dark"})
 
-        extensions_list = []
-        for ext in playlist_extensions:
-            extensions_list.append(str(ext.get("href")))
-        these_urls = [('https://soundcloud.com' + i) for i in extensions_list]
-    finally:
-        driver.quit()
-        return(these_urls)
+            extensions_list = [str(ext.get("href")) for ext in playlist_extensions]
 
-#Returns playlist in dataframe format
-def getplaylist(this_url):
-    """param this_url: link of specific playlist url"""
-    driver = webdriver.Chrome()
-    try:
-        driver.get(this_url)
-        last_height = driver.execute_script("return document.body.scrollHeight")
-        while True:
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(1)
-            new_height = driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
+            corr_ext = []
+            for i in extensions_list:
+                splt = i.split('/')
+                if splt[1] == user and splt[2] == 'sets':
+                    corr_ext.append(i)
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+            these_urls = [('https://soundcloud.com' + i) for i in corr_ext]
+            self.playlist_urls = these_urls
+        finally:
+            driver.quit()
+            return these_urls
 
-        TrackNames = soup.find_all("a", class_ = {'trackItem__trackTitle sc-link-dark sc-font-light'})
-        ArtistNames = soup.find_all("a", class_ = {"trackItem__username sc-link-light"})
+    #Returns playlist in dataframe format
+    def getplaylist(self, this_url):
+        """
+        Retrieve artist and song from specified playlist
 
-        tracknames_list = []
-        for names in TrackNames:
-            tracknames_list.append(str(names.text))
+        param this_url: link of specific playlist url
+        """
+        driver = webdriver.Chrome()
+        try:
+            driver.get(this_url)
+            last_height = driver.execute_script("return document.body.scrollHeight")
+            while True:
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(1)
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+                last_height = new_height
 
-        artistnames_list = []
-        for names in ArtistNames:
-            artistnames_list.append(str(names.text))
+            soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        playlist = pd.DataFrame({'Tracks':pd.Series(tracknames_list), 'Artists':pd.Series\
-                        (artistnames_list)})
+            TrackNames = soup.find_all("a", class_ = {'trackItem__trackTitle sc-link-dark sc-font-light'})
+            ArtistNames = soup.find_all("a", class_ = {"trackItem__username sc-link-light"})
 
-    finally:
-        driver.quit()
-        return(playlist)
+            tracknames_list = [str(names.text) for names in TrackNames]
+
+            artistnames_list = [str(names.text) for names in ArtistNames]
+
+            playlist = pd.DataFrame({'Tracks':pd.Series(tracknames_list), 'Artists':pd.Series\
+                            (artistnames_list)})
+
+        finally:
+            driver.quit()
+            return playlist
+    
+    def __repr__(self):
+        return f'The set url is {self.url}'
+
 
 #Excel File
 def get_excel(URL):
     playlist_dfs = []
-    urls = which_playlists(URL)
+    sc = GetSpotify(URL)
+    urls = sc.which_playlists()
     for i in urls:
-        this_df = getplaylist(i)
+        this_df = sc.getplaylist(i)
         playlist_dfs.append(this_df)
 
     playlist_order = playlist_dfs[::-1]
@@ -97,5 +113,14 @@ def get_excel(URL):
     finally:
         writer.save()
 
+if __name__ == "__main__":
+    try:
+        val = input('Enter your soundcloud playlist page: ')
+        print('Getting URL and playlists....')
+        get_excel(val)
+        time.sleep(1)
+        print('Scraping done! The excel file is on your desktop!')
+    except Exception as e:
+        print('GG NO RE, error due to' + str(e))
 
-get_excel("https://soundcloud.com/whoishe1/sets")
+
