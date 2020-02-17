@@ -17,7 +17,6 @@ class GetSpotify:
     def which_playlists(self):
         """
         Get playlist url page and load playlists
-        @param URL: soundcloud playlist url page
         """
         this_url = self.url
         user = self.url.split('/')[3]
