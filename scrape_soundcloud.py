@@ -10,7 +10,7 @@ import os
 #Desktop Path
 desktop = os.path.join(os.path.join(os.environ["USERPROFILE"]), 'Desktop')
 
-class GetSpotify:
+class GetSoundCloud:
     def __init__(self,url):
         self.url = url
 
@@ -92,7 +92,7 @@ class GetSpotify:
 #Excel File
 def get_excel(URL):
     playlist_dfs = []
-    sc = GetSpotify(URL)
+    sc = GetSoundCloud(URL)
     urls = sc.which_playlists()
     for i in urls:
         this_df = sc.getplaylist(i)
