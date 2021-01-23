@@ -132,7 +132,6 @@ def main(URL):
         # write XLSX
         excel_name = "\\soundcloud_playlist_" + TODAYS_DATE + "." + "xlsx"
         writer = pd.ExcelWriter(desktop + str(excel_name), engine="xlsxwriter")
-        writer
         total_playlist.to_excel(writer, sheet_name="total_playlist", index=False)
         for idx, val in enumerate(playlist_order):
             idx_ = idx + 1
