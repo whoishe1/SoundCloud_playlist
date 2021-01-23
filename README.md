@@ -12,6 +12,6 @@
 - It doesn't affect the program, but the error is known and  will be fixed in the future.
 
 - More information here:
-  - `https://stackoverflow.com/questions/64927909/failed-to-read-descriptor-from-node-connection-a-device-attached-to-the-system`
-  - `https://bugs.chromium.org/p/chromium/issues/detail?id=637404#c37`
-  - `https://chromium.googlesource.com/chromium/src.git/+/3182b136ef56eadaf927a2f35446ddb06b133d9e`
+  - https://stackoverflow.com/questions/64927909/failed-to-read-descriptor-from-node-connection-a-device-attached-to-the-system
+  - https://bugs.chromium.org/p/chromium/issues/detail?id=637404#c37
+  - https://chromium.googlesource.com/chromium/src.git/+/3182b136ef56eadaf927a2f35446ddb06b133d9e
